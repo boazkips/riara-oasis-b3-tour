@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B3 · 2 Bedroom Virtual Tour · Riara Oasis Residency</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#15110e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, warm, an estate-agent walkthrough - the house speaks, the UI whispers
+   IDEA: an open-house visit - you stand in a room and doorways invite you onward
+   PICTURE: the full-bleed 360 photo itself is the picture; doorway markers glow softly
+   COLOUR and TYPE: deep walnut night #15110e, rich orange accent #e8741a, white text; Figtree
+   LAYOUT: viewer fills the screen; room name top-left; room strip along the bottom */
+:root{color-scheme:dark;--bg:#15110e;--ink:#fbf7f1;--orange:#e8741a;--glass:rgba(21,17,14,.72)}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif;overflow:hidden}
+#view{position:fixed;inset:0;cursor:grab;touch-action:none}
+#view.drag{cursor:grabbing}
+#view canvas{display:block;width:100%;height:100%}
+#fade{position:fixed;inset:0;background:var(--bg);opacity:1;pointer-events:none;transition:opacity .45s ease}
+#fade.off{opacity:0}
+#hs{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.spot{position:absolute;left:0;top:0;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;padding:0;color:var(--ink);font:700 14px Figtree,sans-serif;cursor:pointer;transform-origin:center}
+.ring{width:54px;height:54px;border-radius:50%;background:rgba(232,116,26,.22);border:2px solid var(--orange);display:grid;place-items:center;backdrop-filter:blur(4px);box-shadow:0 0 0 0 rgba(232,116,26,.5);animation:pulse 2.4s infinite}
+.ring svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.spot .lbl{background:var(--glass);padding:4px 10px;border-radius:999px;white-space:nowrap;opacity:.95}
+.spot:hover .ring,.spot:focus-visible .ring{background:var(--orange)}
+.spot:focus-visible{outline:none}
+.spot:focus-visible .lbl{outline:2px solid var(--orange)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,116,26,.45)}70%{box-shadow:0 0 0 16px rgba(232,116,26,0)}100%{box-shadow:0 0 0 0 rgba(232,116,26,0)}}
+@media (prefers-reduced-motion:reduce){.ring{animation:none}#fade{transition:none}}
+header{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px max(16px,3vw);background:linear-gradient(rgba(21,17,14,.75),rgba(21,17,14,0));pointer-events:none}
+header>*{pointer-events:auto}
+.where small{display:block;font-size:13px;color:var(--orange);font-weight:700}
+.where h1{margin:0;font-size:clamp(22px,3.4vw,30px);line-height:1.05;font-weight:800;text-wrap:balance}
+.tools{position:fixed;right:max(12px,1.5vw);top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:10px;padding:10px 8px;background:rgba(110,110,110,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.25);transition:opacity .2s}
+.tools button,.nav button{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:var(--glass);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.tools button[aria-pressed=true]{background:var(--orange);color:#15110e;border-color:var(--orange)}
+.tools svg,.nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+button:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+footer{position:fixed;left:max(12px,1.5vw);right:max(12px,1.5vw);bottom:max(12px,2.5vh);padding:14px 22px;background:rgba(110,110,110,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:4px;display:flex;align-items:center}
+footer{gap:10px}
+footer .nav{flex:none}
+footer .nav button{width:42px;height:42px;border-radius:3px;border:0;background:rgba(60,60,60,.72);color:#fff;transition:opacity .2s,background .2s}
+footer .nav button:hover{background:var(--orange)}
+footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,.72)}
+.track{position:relative;flex:1;display:flex}
+.track::before,.track::after{content:"";position:absolute;top:0;bottom:0;width:36px;pointer-events:none;z-index:1;transition:opacity .2s}
+.track::before{left:0;background:linear-gradient(90deg,rgba(90,90,90,.9),transparent)}
+.track::after{right:0;background:linear-gradient(270deg,rgba(90,90,90,.9),transparent)}
+.track.at-start::before,.track.at-end::after{opacity:0}
+#strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;flex:1}
+#strip::-webkit-scrollbar{display:none}
+.room{flex:1 0 150px;scroll-snap-align:start;height:42px;border:0;border-radius:3px;background:rgba(60,60,60,.72);color:#fff;font:400 17px/1 "Times New Roman",Times,Georgia,serif;letter-spacing:.01em;white-space:nowrap;padding:0 18px;cursor:pointer;transition:background .2s}
+.room img{display:none}
+.room:hover{background:rgba(80,80,80,.85)}
+.room[aria-current=true]{background:var(--orange);color:#fff}
+.where{max-width:min(520px,70vw)}
+.where small{font:400 15px "Times New Roman",Times,serif;color:#fff;opacity:.9;letter-spacing:.02em}
+.where h1{font-family:"Times New Roman",Times,Georgia,serif;font-weight:700}
+.price{margin:6px 0 0;font:400 17px "Times New Roman",Times,serif;color:var(--orange);text-shadow:0 1px 6px rgba(0,0,0,.45)}
+.price .usd{color:#fff;opacity:.85;margin-left:6px}
+.where small,.where h1{text-shadow:0 1px 8px rgba(0,0,0,.5)}
+#facts{position:fixed;top:96px;right:calc(max(12px,1.5vw) + 78px);width:min(340px,calc(100vw - 32px));max-height:calc(100vh - 220px);overflow:auto;background:rgba(30,26,22,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:6px;padding:20px 22px;font-family:"Times New Roman",Times,Georgia,serif;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+#facts[hidden]{display:none}
+#facts h2{margin:0 0 12px;font-size:24px;line-height:1.1}
+#facts h3{margin:16px 0 6px;font-size:17px;color:var(--orange);font-weight:400}
+#facts dl{margin:0;display:grid;gap:9px}
+#facts dl div{display:grid;grid-template-columns:118px 1fr;gap:10px;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.12)}
+#facts dt{opacity:.7;font-size:15px}
+#facts dd{margin:0;font-size:16px;line-height:1.35}
+#facts dd b{color:var(--orange);font-weight:700;white-space:nowrap}
+#facts dd .usd{display:block;opacity:.8;font-size:15px;white-space:nowrap}
+#facts ul{margin:0;padding-left:18px;font-size:16px;line-height:1.6}
+#facts .fx{margin:14px 0 0;font-size:13px;opacity:.6}
+#facts .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;display:grid;place-items:center}
+#facts .x svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+.wa-fab{position:fixed;right:max(16px,2vw);bottom:96px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:5;transition:transform .2s}
+.wa-fab:hover{transform:scale(1.06)}
+.wa-fab .wa{width:30px;height:30px}
+.enq{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(10,8,6,.45);animation:fadeIn .35s ease}
+.enq[hidden]{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.enq .card{position:relative;width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;background:rgba(30,26,22,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink);border-radius:6px;padding:22px 24px 20px;box-shadow:0 10px 40px rgba(0,0,0,.35);font-family:"Times New Roman",Times,Georgia,serif;outline:none;animation:rise .4s ease}
+@keyframes rise{from{transform:translateY(12px)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.enq,.enq .card{animation:none}}
+.enq .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;display:grid;place-items:center}
+.enq .x svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.enq .eyebrow{margin:0;color:var(--orange);font-size:15px}
+.enq h2{margin:2px 0 16px;font-size:20px;line-height:1.1;font-weight:700;text-wrap:balance;padding-right:30px}
+.enq .sum{margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.12);font-size:16px;line-height:1.4;opacity:.9}
+.enq .sum b{color:var(--orange);white-space:nowrap}
+.direct{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border-radius:3px;font:400 17px "Times New Roman",Times,Georgia,serif;text-decoration:none;white-space:nowrap;color:#fff;transition:background .2s}
+.btn svg{width:20px;height:20px;flex:none}
+.wa-btn{background:var(--orange)}
+.wa-btn:hover{background:#cf6412}
+.call{background:rgba(60,60,60,.72)}
+.call svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.call:hover{background:rgba(80,80,80,.9)}
+.btn.wide{width:100%;margin-top:6px}
+.or{margin:16px 0 10px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);font-size:17px;color:var(--orange)}
+#enqForm label{display:block;font-size:15px;color:rgba(251,247,241,.7);margin-bottom:10px}
+#enqForm label:focus-within{color:#fff}
+#enqForm .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#enqForm input,#enqForm select,#enqForm textarea{display:block;width:100%;margin-top:4px;padding:9px 11px;border:1px solid rgba(255,255,255,.18);border-radius:3px;background:rgba(255,255,255,.06);color:#fff;font:16px "Times New Roman",Times,Georgia,serif;color-scheme:dark}
+#enqForm select option{background:#1e1a16}
+#enqForm select{-webkit-appearance:none;appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;cursor:pointer}
+#enqForm select:focus{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+#enqForm textarea{resize:vertical;line-height:1.35}
+#enqForm input:focus,#enqForm select:focus,#enqForm textarea:focus{outline:none;border-color:var(--orange);background-color:rgba(255,255,255,.09)}
+.err{margin:0 0 6px;color:#ffb28a;font-size:15px}
+.err:empty{display:none}
+.note{margin:10px 0 0;font-size:13px;opacity:.6;text-align:center}
+
+
+.nw{white-space:nowrap}
+/* ---- phone layout ---- */
+@media(max-width:600px){
+  header{padding:12px 12px 24px;gap:8px}
+  .where{max-width:none;flex:1}
+  .where small{font-size:13px}
+  .where h1{font-size:22px}
+  .price{font-size:15px;margin-top:4px}
+  .price .usd{display:block;margin:2px 0 0;white-space:nowrap;font-size:14px}
+  .tools{gap:8px;padding:8px 6px;right:8px}
+  body.facts-open .tools{opacity:0;pointer-events:none}
+  .tools button{width:40px;height:40px}
+  .tools svg{width:18px;height:18px}
+  #facts{top:auto;bottom:76px;left:10px;right:10px;width:auto;max-height:calc(100vh - 200px);padding:18px 16px}
+  #facts dl div{grid-template-columns:104px 1fr}
+  body.facts-open .wa-fab,body.enq-open .wa-fab{display:none}
+  .wa-fab{right:12px;bottom:82px;width:50px;height:50px}
+  .wa-fab .wa{width:27px;height:27px}
+  .enq{padding:10px;align-items:center}
+  .enq .card{max-height:calc(100dvh - 20px);padding:0 16px 16px;border-radius:8px}
+  .enq .x{position:sticky;top:0;margin:0 -6px 0 auto;float:right;z-index:2;background:rgba(30,26,22,.9)}
+  .enq .eyebrow{padding-top:16px}
+  .enq h2{font-size:18px;margin-bottom:12px}
+  .enq .sum{font-size:15px;margin-bottom:10px;padding-bottom:10px}
+  .direct{grid-template-columns:1fr 1fr;gap:8px}
+  .direct .btn{font-size:15px;padding:0 8px;gap:6px}
+  .direct .call span{font-size:14px}
+  .or{margin:12px 0 8px;padding-top:10px;font-size:15px}
+  #enqForm .row{grid-template-columns:1fr 1fr;gap:8px}
+  #enqForm label{margin-bottom:8px;font-size:14px}
+  #enqForm input,#enqForm select,#enqForm textarea{padding:8px 10px;margin-top:3px}
+  #enqForm select{padding-right:34px;background-position:right 10px center}
+  #enqForm textarea{min-height:64px}
+  .room{flex-basis:118px}
+}
+@media(max-width:350px){.direct,#enqForm .row{grid-template-columns:1fr}.tools button{width:36px;height:36px}}
+#hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--glass);padding:12px 18px;border-radius:12px;font-weight:700;pointer-events:none;transition:opacity .6s;text-align:center}
+#hint.gone{opacity:0}
+#err{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:24px}
+@media(max-width:600px){footer{padding:10px 12px;gap:6px}footer .nav button{width:36px;height:38px}.room{flex-basis:120px;height:38px;font-size:15px}.spot{font-size:13px}.ring{width:46px;height:46px}}
+</style>
+</head>
+<body>
+<div id="view" aria-label="360 degree view. Drag to look around."></div>
+<div id="hs"></div>
+<div id="fade"></div>
+<header>
+  <div class="where"><small><span class="nw">Riara Oasis · B3</span> · <span class="nw">2 bedrooms</span> · <span class="nw">128 m²</span></small><h1 id="name">Entrance</h1><p class="price">Off-plan · for sale</p></div>
+  <div class="tools">
+    <button id="contact" title="Enquire about this unit"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></button>
+    <button id="info" aria-pressed="false" aria-controls="facts" title="Property details"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
+    <button id="rot" aria-pressed="true" title="Auto-rotate"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
+    <button id="fs" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</header>
+<aside id="facts" hidden aria-label="Property details">
+  <button id="close" class="x" aria-label="Close details"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <h2>Property details</h2>
+  <dl>
+    <div><dt>Unit type</dt><dd>B3 · 2 bedrooms</dd></div>
+    <div><dt>Size</dt><dd>128 m²</dd></div>
+    <div><dt>Bathrooms</dt><dd>2 en-suite + guest toilet</dd></div>
+    <div><dt>Price</dt><dd>On request</dd></div>
+    <div><dt>Balconies</dt><dd>2 - off the living room and the master bedroom</dd></div>
+    <div><dt>Location</dt><dd>Riara Road, Kilimani - next to Makini School</dd></div>
+    <div><dt>Completion</dt><dd>March 2028</dd></div>
+  </dl>
+  <h3>Amenities</h3>
+  <ul><li>Heated swimming pool</li><li>Rooftop barbecue area</li><li>4 parking levels</li><li>High-speed lifts</li><li>24/7 CCTV &amp; intercom</li><li>Backup generator</li><li>Borehole with water purifier</li></ul>
+  <p class="fx">This tour shows the furnished B3 show house.</p>
+</aside>
+<a id="waFab" class="wa-fab" href="https://wa.me/254708629418" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg></a>
+<div id="enq" class="enq" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="enqT" tabindex="-1">
+    <button class="x" id="enqX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <p class="eyebrow">Riara Oasis Residency</p>
+    <h2 id="enqT">Interested in this B3 unit?</h2>
+    <div class="direct">
+      <a class="btn wa-btn" id="waDirect" href="https://wa.me/254708629418" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span>WhatsApp us</span></a>
+      <a class="btn call" href="tel:+254708629418"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg><span>+254 708 629 418</span></a>
+    </div>
+    <form id="enqForm" novalidate>
+      <p class="or">Or send your details and we'll get back to you</p>
+      <div class="row">
+        <label>Full name<input id="fName" autocomplete="name" required></label>
+        <label>Phone or email<input id="fContact" autocomplete="tel" required></label>
+      </div>
+      <div class="row">
+        <label>Buying timeline<select id="fDate"><option value="">Choose one</option></select></label>
+        <label>Viewing<select id="fView"><option>Visit the show house</option><option>Video call</option><option>Not yet</option></select></label>
+      </div>
+      <p class="err" id="fErr" role="alert"></p>
+      <a class="btn wa-btn wide" id="fSend" href="https://wa.me/254708629418" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span>Send enquiry on WhatsApp</span></a>
+    </form>
+  </div>
+</div>
+<div id="hint">Drag to look around · tap the circles to walk</div>
+<footer>
+  <div class="nav"><button id="prev" title="Scroll rooms left" aria-label="Scroll rooms left"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+  <div class="track" id="track"><div id="strip" role="list"></div></div>
+  <div class="nav"><button id="next" title="Scroll rooms right" aria-label="Scroll rooms right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>
+</footer>
+<div id="err"><p>This device could not start the 3D viewer (WebGL is off or unsupported).<br>Try a recent Chrome, Safari or Edge.</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+{
+// Each room: id, name, photo file, start direction (u = 0..1 across the photo), and doorways.
+// Doorway: [u, v, target id]  - u/v are positions across/down the panorama photo.
+const ROOMS=[
+ {id:'entrance',name:'Entrance',f:'01',u:.62,go:[[.62,.6,'living-dining'],[.5,.6,'living'],[.88,.58,'kitchen'],[.02,.58,'hallway']]},
+ {id:'living-dining',name:'Living & Dining',f:'02',u:.45,go:[[.22,.58,'entrance'],[.43,.55,'corridor'],[.55,.62,'living'],[.72,.58,'balcony'],[.9,.62,'dining'],[.05,.58,'hallway']]},
+ {id:'living',name:'Living Room',f:'03',u:.5,go:[[.2,.6,'balcony'],[.4,.58,'dining'],[.63,.57,'entrance'],[.81,.56,'corridor']]},
+ {id:'dining',name:'Dining Area',f:'04',u:.45,go:[[.75,.62,'kitchen'],[.47,.6,'living-dining'],[.29,.57,'entrance']]},
+ {id:'kitchen',name:'Kitchen',f:'05',u:.45,go:[[.92,.62,'dining'],[.82,.58,'entrance'],[.02,.6,'living-dining']]},
+ {id:'balcony',name:'Balcony',f:'06',u:.45,go:[[.45,.62,'living'],[.22,.62,'balcony-view'],[.9,.62,'balcony-side']]},
+ {id:'balcony-view',name:'Balcony View',f:'07',u:.75,go:[[.37,.58,'living'],[.47,.64,'balcony'],[.05,.62,'balcony-side']]},
+ {id:'balcony-side',name:'Balcony - Kitchen Side',f:'08',u:.45,go:[[.6,.58,'living-dining'],[.75,.64,'balcony-view']]},
+ {id:'corridor',name:'Bedroom 2 Entry',f:'09',u:.3,go:[[.08,.6,'bedroom-2'],[.35,.6,'living']]},
+ {id:'bedroom-2',name:'Bedroom 2',f:'10',u:.3,go:[[.57,.58,'corridor'],[.93,.6,'b2-wardrobe']]},
+ {id:'b2-wardrobe',name:'Bedroom 2 Wardrobe',f:'11',u:.5,go:[[.9,.6,'b2-bath'],[.27,.62,'bedroom-2']]},
+ {id:'b2-bath',name:'Bedroom 2 En-suite',f:'12',u:.7,go:[[.5,.6,'b2-wardrobe']]},
+ {id:'hallway',name:'Hallway',f:'13',u:.3,go:[[.26,.6,'master-wardrobe'],[.68,.6,'living-dining'],[.93,.6,'guest-wc']]},
+ {id:'guest-wc',name:'Guest Toilet',f:'14',u:.8,go:[[.5,.6,'hallway']]},
+ {id:'master-wardrobe',name:'Master Wardrobe',f:'15',u:.95,go:[[.45,.6,'hallway'],[.72,.6,'ensuite'],[.95,.62,'master']]},
+ {id:'ensuite',name:'Master En-suite',f:'16',u:.7,go:[[.47,.6,'master-wardrobe']]},
+ {id:'master',name:'Master Bedroom',f:'17',u:.65,go:[[.48,.56,'master-wardrobe'],[.88,.6,'master-balcony'],[.7,.68,'master-view']]},
+ {id:'master-view',name:'Master Bedroom View',f:'18',u:.3,go:[[.27,.6,'master-balcony'],[.45,.64,'master'],[.61,.58,'master-wardrobe']]},
+ {id:'master-balcony',name:'Master Balcony',f:'19',u:.3,go:[[.72,.62,'master']]}
+];
+let roomHook=null;const onRoom=r=>{if(roomHook)roomHook(r)};
+const byId=Object.fromEntries(ROOMS.map(r=>[r.id,r]));
+const $=s=>document.querySelector(s);
+const view=$('#view'),hs=$('#hs'),fade=$('#fade');
+const deg=Math.PI/180;
+const dir=(u,v,r=1)=>{const lon=u*2*Math.PI,lat=(0.5-v)*Math.PI;return new THREE.Vector3(Math.cos(lon)*Math.cos(lat)*r,Math.sin(lat)*r,Math.sin(lon)*Math.cos(lat)*r)};
+
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:false})}catch(e){$('#err').style.display='grid';throw e}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+view.appendChild(renderer.domElement);
+const folder=renderer.capabilities.maxTextureSize>=8192?'pano':'pano4k';
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(80,1,1,1100);
+const geo=new THREE.SphereGeometry(500,96,64);geo.scale(-1,1,1);
+const mat=new THREE.MeshBasicMaterial({color:0xffffff});
+scene.add(new THREE.Mesh(geo,mat));
+const loader=new THREE.TextureLoader();
+const cache={};
+
+const baseFov=()=>innerWidth<innerHeight?105:80;
+let lon=.5,lat=0,fov=baseFov(),auto=true,cur=null,spots=[];
+const strip=$('#strip');
+strip.innerHTML=ROOMS.map((r,i)=>`<button class="room" role="listitem" data-id="${r.id}">${r.name}</button>`).join('');
+
+function tex(r){
+  if(cache[r.f])return Promise.resolve(cache[r.f]);
+  return new Promise((ok,no)=>loader.load(`${folder}/${r.f}.jpg?v=4`,t=>{
+    t.encoding=THREE.sRGBEncoding;t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;
+    t.anisotropy=renderer.capabilities.getMaxAnisotropy();cache[r.f]=t;ok(t)},undefined,no));
+}
+async function go(id,push=true){
+  const r=byId[id]||ROOMS[0];
+  if(cur===r)return;
+  fade.classList.remove('off');
+  const wait=new Promise(res=>setTimeout(res,cur?420:0));
+  const [t]=await Promise.all([tex(r),wait]);
+  cur=r;onRoom(r);mat.map=t;mat.needsUpdate=true;lon=r.u;lat=0;fov=baseFov();
+  $('#name').textContent=r.name;
+    document.title=r.name+' · House Virtual Tour';
+  for(const b of strip.children){const on=b.dataset.id===r.id;b.setAttribute('aria-current',on);if(on)b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
+  hs.innerHTML='';
+  spots=r.go.map(([u,v,to])=>{
+    const b=document.createElement('button');b.className='spot';
+    b.innerHTML='<span class="ring"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><span class="lbl"></span>';
+    b.querySelector('.lbl').textContent=byId[to].name;
+    b.addEventListener('click',e=>{e.stopPropagation();go(to)});
+    hs.appendChild(b);return {el:b,p:dir(u,v,400)};
+  });
+  if(push&&location.hash.slice(1)!==r.id)history.replaceState(null,'','#'+r.id);
+  requestAnimationFrame(()=>fade.classList.add('off'));
+  // warm up the next rooms
+  r.go.forEach(([, ,to])=>tex(byId[to]).catch(()=>{}));
+}
+
+function size(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(size).observe(view);size();
+
+const v3=new THREE.Vector3();
+function frame(){
+  if(auto&&!down)lon+=0.00012;
+  lat=Math.max(-85,Math.min(85,lat));
+  camera.fov=fov;camera.updateProjectionMatrix();
+  camera.lookAt(dir(lon,0.5-lat/180,1));
+  renderer.render(scene,camera);
+  const w=view.clientWidth,h=view.clientHeight;
+  for(const s of spots){
+    v3.copy(s.p).project(camera);
+    const vis=v3.z<1&&Math.abs(v3.x)<1.2&&Math.abs(v3.y)<1.2;
+    s.el.style.display=vis?'flex':'none';
+    if(vis)s.el.style.transform=`translate(${(v3.x+1)/2*w}px,${(1-v3.y)/2*h}px) translate(-50%,-27px)`;
+  }
+  requestAnimationFrame(frame);
+}
+
+// drag / pinch / wheel / keys
+let down=false,px=0,py=0;const pts=new Map();let pinch0=0,fov0=80;
+const hint=$('#hint');if(matchMedia('(pointer:coarse)').matches)hint.innerHTML='Swipe to look around<br>Tap the circles to walk';const hideHint=()=>hint.classList.add('gone');setTimeout(hideHint,5000);
+view.addEventListener('pointerdown',e=>{view.setPointerCapture(e.pointerId);pts.set(e.pointerId,e);down=true;px=e.clientX;py=e.clientY;view.classList.add('drag');hideHint();
+  if(pts.size===2){const [a,b]=[...pts.values()];pinch0=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);fov0=fov}});
+view.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,e);
+  if(pts.size===2){const [a,b]=[...pts.values()];const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);fov=Math.max(35,Math.min(115,fov0*pinch0/d));return}
+  const k=fov/view.clientHeight;lon-=(e.clientX-px)*k/360;lat+=(e.clientY-py)*k;px=e.clientX;py=e.clientY});
+const up=e=>{pts.delete(e.pointerId);if(!pts.size){down=false;view.classList.remove('drag')}};
+view.addEventListener('pointerup',up);view.addEventListener('pointercancel',up);
+view.addEventListener('wheel',e=>{e.preventDefault();fov=Math.max(35,Math.min(115,fov+e.deltaY*0.05))},{passive:false});
+addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]'))return;
+  if(!document.getElementById('enq').hidden)return;
+  if(e.key==='ArrowLeft'){lon-=.02;hideHint()}else if(e.key==='ArrowRight'){lon+=.02;hideHint()}
+  else if(e.key==='ArrowUp'){lat+=4}else if(e.key==='ArrowDown'){lat-=4}
+  else if(e.key==='+'||e.key==='='){fov=Math.max(35,fov-5)}else if(e.key==='-'){fov=Math.min(100,fov+5)}
+  else if(e.key==='PageDown'||e.key==='n')step(1);else if(e.key==='PageUp'||e.key==='p')step(-1);
+});
+function step(d){const i=ROOMS.indexOf(cur);go(ROOMS[(i+d+ROOMS.length)%ROOMS.length].id)}
+const track=$('#track'),pb=$('#prev'),nb=$('#next');
+const page=d=>strip.scrollBy({left:d*strip.clientWidth*0.8,behavior:'smooth'});
+pb.addEventListener('click',()=>page(-1));nb.addEventListener('click',()=>page(1));
+function edges(){const max=strip.scrollWidth-strip.clientWidth-2,x=strip.scrollLeft;
+  const fits=max<=0;pb.parentElement.style.display=nb.parentElement.style.display=fits?'none':'';
+  pb.disabled=x<=2;nb.disabled=x>=max;track.classList.toggle('at-start',x<=2);track.classList.toggle('at-end',x>=max)}
+strip.addEventListener('scroll',edges,{passive:true});new ResizeObserver(edges).observe(strip);edges();
+strip.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();strip.scrollBy({left:e.deltaY})}},{passive:false});
+strip.addEventListener('click',e=>{const b=e.target.closest('.room');if(b)go(b.dataset.id)});
+$('#rot').addEventListener('click',e=>{auto=!auto;e.currentTarget.setAttribute('aria-pressed',auto)});
+$('#fs').addEventListener('click',()=>{try{const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();p&&p.catch&&p.catch(()=>{})}catch(_){}} );
+
+// Pricing: KES is the source. USD is shown for guidance.
+// On the live site, /api/rate returns the day's USD→KES rate (checked daily);
+// if it can't be reached, the fallback rate below is used.
+const FALLBACK={rate:129,date:new Date('2026-11-24')};
+const fmtDate=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+function applyRate(rate,date,live){
+  const r2=Math.round(rate*100)/100;
+  document.querySelectorAll('.kes').forEach(e=>e.textContent='KES '+(+e.dataset.kes).toLocaleString('en-US'));
+  document.querySelectorAll('.usd').forEach(e=>e.textContent='≈ US$'+Math.round(+e.dataset.kes/rate).toLocaleString('en-US'));
+}
+applyRate(FALLBACK.rate,FALLBACK.date,false);
+fetch('/api/rate').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+  const rate=+d.rate,dt=new Date(d.updated);
+  if(rate>50&&rate<500&&!isNaN(dt))applyRate(rate,dt,true);
+}).catch(()=>{});
+const facts=$('#facts'),infoB=$('#info');
+const setFacts=open=>{facts.hidden=!open;infoB.setAttribute('aria-pressed',open);document.body.classList.toggle('facts-open',open);if(open){const e=document.getElementById('enq');if(e&&!e.hidden)closeEnq()}};
+infoB.addEventListener('click',()=>setFacts(facts.hidden));
+$('#close').addEventListener('click',()=>setFacts(false));
+setFacts(innerWidth>900);
+
+// Enquiry popup: opens after 10 s on the page (or after visiting 3 rooms), once per visit
+const WA_NUM='254708629418',enq=$('#enq'),card=enq.querySelector('.card');
+const waLink=t=>`https://wa.me/${WA_NUM}?text=${encodeURIComponent(t)}`;
+$('#waFab').href=$('#waDirect').href=waLink("Hello, I saw the virtual tour of the B3 2-bedroom unit (128 m²) at Riara Oasis Residency and I'm interested.");
+let seen=false;try{seen=sessionStorage.getItem('enqSeen')==='1'}catch(_){}
+let lastFocus=null;
+function openEnq(){if(!enq.hidden)return;setFacts(false);lastFocus=document.activeElement;enq.hidden=false;document.body.classList.add('enq-open');card.focus();seen=true;try{sessionStorage.setItem('enqSeen','1')}catch(_){}}
+function closeEnq(){enq.hidden=true;document.body.classList.remove('enq-open');if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+$('#enqX').addEventListener('click',closeEnq);
+enq.addEventListener('click',e=>{if(e.target===enq)closeEnq()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!enq.hidden)closeEnq()});
+$('#contact').addEventListener('click',openEnq);
+setTimeout(()=>{if(!seen)openEnq()},10000);
+const visited=new Set();roomHook=r=>{visited.add(r.id);if(visited.size>=3&&!seen)openEnq()};
+// Build the WhatsApp message from the form as the visitor types
+const F=id=>$('#'+id);
+{ // buying timeline choices
+  const sel=F('fDate');
+  ['Ready to buy now','Within 3 months','3 - 6 months','6 - 12 months','Just exploring'].forEach(t=>{const o=document.createElement('option');o.value=o.textContent=t;sel.appendChild(o)});
+}
+function buildMsg(){
+  const mo=F('fDate').value;
+  return ['Enquiry - Riara Oasis B3, 2 bedrooms, 128 m² (virtual tour)','',
+    'Name: '+F('fName').value.trim(),'Contact: '+F('fContact').value.trim(),
+    mo?'Buying timeline: '+mo:'','Viewing: '+F('fView').value,'',"Hello, I saw the virtual tour of the B3 unit at Riara Oasis Residency and I'm interested. Please share the price and payment plan."].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\n');
+}
+const send=F('fSend');
+const upd=()=>{send.href=waLink(buildMsg())};
+$('#enqForm').addEventListener('input',upd);upd();
+send.addEventListener('click',e=>{
+  const miss=[];if(!F('fName').value.trim())miss.push('your name');if(!F('fContact').value.trim())miss.push('a phone number or email');
+  if(miss.length){e.preventDefault();F('fErr').textContent='Please add '+miss.join(' and ')+'.';(F('fName').value.trim()?F('fContact'):F('fName')).focus();return}
+  F('fErr').textContent='';upd();
+});
+$('#enqForm').addEventListener('submit',e=>e.preventDefault());
+addEventListener('hashchange',()=>go(location.hash.slice(1),false));
+
+go(byId[location.hash.slice(1)]?location.hash.slice(1):'entrance',false).catch(()=>{$('#err').style.display='grid'});
+frame();
+}
+</script>
+</body>
+</html>
