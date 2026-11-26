@@ -57,7 +57,7 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
 .track.at-start::before,.track.at-end::after{opacity:0}
 #strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;flex:1}
 #strip::-webkit-scrollbar{display:none}
-.room{flex:1 0 150px;scroll-snap-align:start;height:42px;border:0;border-radius:3px;background:rgba(60,60,60,.72);color:#fff;font:400 17px/1 "Times New Roman",Times,Georgia,serif;letter-spacing:.01em;white-space:nowrap;padding:0 18px;cursor:pointer;transition:background .2s}
+.room{flex:1 0 auto;min-width:150px;scroll-snap-align:start;height:42px;border:0;border-radius:3px;background:rgba(60,60,60,.72);color:#fff;font:400 17px/1 "Times New Roman",Times,Georgia,serif;letter-spacing:.01em;white-space:nowrap;padding:0 18px;cursor:pointer;transition:background .2s}
 .room img{display:none}
 .room:hover{background:rgba(80,80,80,.85)}
 .room[aria-current=true]{background:var(--orange);color:#fff}
@@ -154,13 +154,13 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
   #enqForm input,#enqForm select,#enqForm textarea{padding:8px 10px;margin-top:3px}
   #enqForm select{padding-right:34px;background-position:right 10px center}
   #enqForm textarea{min-height:64px}
-  .room{flex-basis:118px}
+  .room{min-width:118px}
 }
 @media(max-width:350px){.direct,#enqForm .row{grid-template-columns:1fr}.tools button{width:36px;height:36px}}
 #hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--glass);padding:12px 18px;border-radius:12px;font-weight:700;pointer-events:none;transition:opacity .6s;text-align:center}
 #hint.gone{opacity:0}
 #err{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:24px}
-@media(max-width:600px){footer{padding:10px 12px;gap:6px}footer .nav button{width:36px;height:38px}.room{flex-basis:120px;height:38px;font-size:15px}.spot{font-size:13px}.ring{width:46px;height:46px}}
+@media(max-width:600px){footer{padding:10px 12px;gap:6px}footer .nav button{width:36px;height:38px}.room{min-width:120px;padding:0 14px;height:38px;font-size:15px}.spot{font-size:13px}.ring{width:46px;height:46px}}
 </style>
 </head>
 <body>
@@ -291,7 +291,7 @@ async function go(id,push=true){
   const [t]=await Promise.all([tex(r),wait]);
   cur=r;onRoom(r);mat.map=t;mat.needsUpdate=true;lon=r.u;lat=0;fov=baseFov();
   $('#name').textContent=r.name;
-    document.title=r.name+' · House Virtual Tour';
+    document.title=r.name+' · Riara Oasis B3 Virtual Tour';
   for(const b of strip.children){const on=b.dataset.id===r.id;b.setAttribute('aria-current',on);if(on)b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
   hs.innerHTML='';
   spots=r.go.map(([u,v,to])=>{
