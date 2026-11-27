@@ -167,6 +167,7 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
 #err{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:24px}
 @media(max-width:600px){footer{padding:10px 12px;gap:6px}footer .nav button{width:36px;height:38px}.room{min-width:120px;padding:0 14px;height:38px;font-size:15px}.spot{font-size:13px}.ring{width:46px;height:46px}}
 .lang{position:relative;margin-left:auto}
+header.lang-open{z-index:50}
 .lang-btn{display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 12px;border:0;border-radius:20px;background:var(--glass);color:#fff;font:700 14px/1 "Times New Roman",Times,Georgia,serif;letter-spacing:.06em;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .lang-btn:hover{background:rgba(60,60,60,.85)}
 .lang .flag{display:inline-flex;width:22px;height:15px;border-radius:2px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.25);flex:none}
@@ -514,7 +515,7 @@ const langBox=$('#lang');
 langBox.innerHTML='<button type="button" class="lang-btn" aria-haspopup="listbox" aria-expanded="false"></button><ul class="lang-menu" role="listbox" hidden>'+
   Object.keys(LANGS).map(k=>`<li role="option" tabindex="0" data-lang="${k}" lang="${k}"><span class="flag">${FLAGS[k]}</span><span class="code">${LANGS[k].code}</span><span class="nm">${LANGS[k].name}</span></li>`).join('')+'</ul>';
 const langBtn=langBox.querySelector('.lang-btn'),langMenu=langBox.querySelector('.lang-menu');
-const menu=open=>{langMenu.hidden=!open;langBtn.setAttribute('aria-expanded',open);if(open)(langMenu.querySelector('[aria-selected=true]')||langMenu.firstChild).focus()};
+const menu=open=>{langMenu.hidden=!open;langBtn.setAttribute('aria-expanded',open);document.querySelector('header').classList.toggle('lang-open',open);if(open)(langMenu.querySelector('[aria-selected=true]')||langMenu.firstChild).focus()};
 langBtn.addEventListener('click',e=>{e.stopPropagation();menu(langMenu.hidden)});
 langMenu.addEventListener('click',e=>{const o=e.target.closest('[data-lang]');if(o){applyLang(o.dataset.lang);menu(false);langBtn.focus()}});
 langMenu.addEventListener('keydown',e=>{const o=e.target.closest('[data-lang]');if(!o)return;
