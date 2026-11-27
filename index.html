@@ -166,6 +166,23 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
 #hint.gone{opacity:0}
 #err{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:24px}
 @media(max-width:600px){footer{padding:10px 12px;gap:6px}footer .nav button{width:36px;height:38px}.room{min-width:120px;padding:0 14px;height:38px;font-size:15px}.spot{font-size:13px}.ring{width:46px;height:46px}}
+.lang{position:relative;margin-left:auto}
+.lang-btn{display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 12px;border:0;border-radius:20px;background:var(--glass);color:#fff;font:700 14px/1 "Times New Roman",Times,Georgia,serif;letter-spacing:.06em;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.lang-btn:hover{background:rgba(60,60,60,.85)}
+.lang .flag{display:inline-flex;width:22px;height:15px;border-radius:2px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.25);flex:none}
+.lang .flag svg{width:100%;height:100%;display:block}
+.lang .chev{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.lang-menu{position:absolute;top:46px;right:0;min-width:190px;margin:0;padding:6px;list-style:none;background:rgba(30,26,22,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:30}
+.lang-menu li{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:5px;cursor:pointer;font-size:15px;color:#fff;outline:none}
+.lang-menu li .code{font-weight:700;letter-spacing:.06em;font-size:13px;min-width:34px}
+.lang-menu li .nm{opacity:.8}
+.lang-menu li:hover,.lang-menu li:focus{background:rgba(255,255,255,.1)}
+.lang-menu li[aria-selected=true]{background:var(--orange)}
+.lang-menu li[aria-selected=true] .nm{opacity:1}
+[dir=rtl] .x{right:auto;left:10px}
+#facts[dir=rtl] dl div,#enq .card[dir=rtl]{text-align:right}
+#enq .card[dir=rtl] #enqForm select{background-position:left 12px center;padding-right:11px;padding-left:38px}
+@media(max-width:600px){.lang-btn{height:36px;padding:0 8px 0 10px;font-size:13px}.lang-menu{min-width:170px}}
 </style>
 </head>
 <body>
@@ -173,68 +190,113 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
 <div id="hs"></div>
 <div id="fade"></div>
 <header>
-  <div class="where"><small><span class="nw">Riara Oasis · B3</span> · <span class="nw">2 bedrooms</span> · <span class="nw">128 m²</span></small><h1 id="name">Entrance</h1><p class="price">Off-plan · for sale</p></div>
+  <div class="where"><small><span class="nw">Riara Oasis · B3</span> · <span class="nw" data-i18n="beds">2 bedrooms</span> · <span class="nw">128 m²</span></small><h1 id="name">Entrance</h1><p class="price" data-i18n="price">Off-plan · for sale</p></div>
+  <div class="lang" id="lang"></div>
   <div class="tools">
-    <button id="contact" title="Enquire about this unit"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></button>
-    <button id="info" aria-pressed="false" aria-controls="facts" title="Property details"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
-    <button id="rot" aria-pressed="true" title="Auto-rotate"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
-    <button id="fs" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button id="contact" data-i18n-t="tContact" title="Enquire about this unit"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></button>
+    <button id="info" aria-pressed="false" aria-controls="facts" data-i18n-t="details" title="Property details"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
+    <button id="rot" aria-pressed="true" data-i18n-t="tRot" title="Auto-rotate"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
+    <button id="fs" data-i18n-t="tFs" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
   </div>
 </header>
 <aside id="facts" hidden aria-label="Property details">
-  <button id="close" class="x" aria-label="Close details"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <h2>Property details</h2>
+  <button id="close" class="x" data-i18n-t="tCloseD" aria-label="Close details"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <h2 data-i18n="details">Property details</h2>
   <dl>
-    <div><dt>Unit type</dt><dd>B3 · 2 bedrooms</dd></div>
-    <div><dt>Size</dt><dd>128 m²</dd></div>
-    <div><dt>Bathrooms</dt><dd>2 en-suite + guest toilet</dd></div>
-    <div><dt>Price</dt><dd>On request</dd></div>
-    <div><dt>Balconies</dt><dd>2 - off the living room and the master bedroom</dd></div>
-    <div><dt>Location</dt><dd>Riara Road, Kilimani - next to Makini School</dd></div>
-    <div><dt>Completion</dt><dd>March 2028</dd></div>
+    <div><dt data-i18n="dUnit">Unit type</dt><dd data-i18n="vUnit">B3 · 2 bedrooms</dd></div>
+    <div><dt data-i18n="dSize">Size</dt><dd>128 m²</dd></div>
+    <div><dt data-i18n="dBath">Bathrooms</dt><dd data-i18n="vBath">2 en-suite + guest toilet</dd></div>
+    <div><dt data-i18n="dPrice">Price</dt><dd data-i18n="vPrice">On request</dd></div>
+    <div><dt data-i18n="dBalc">Balconies</dt><dd data-i18n="vBalc">2 - off the living room and the master bedroom</dd></div>
+    <div><dt data-i18n="dLoc">Location</dt><dd data-i18n="vLoc">Riara Road, Kilimani - next to Makini School</dd></div>
+    <div><dt data-i18n="dComp">Completion</dt><dd data-i18n="vComp">March 2028</dd></div>
   </dl>
-  <h3>Amenities</h3>
-  <ul><li>Heated swimming pool</li><li>Rooftop barbecue area</li><li>4 parking levels</li><li>High-speed lifts</li><li>24/7 CCTV &amp; intercom</li><li>Backup generator</li><li>Borehole with water purifier</li></ul>
-  <p class="fx">This tour shows the furnished B3 show house.</p>
+  <h3 data-i18n="amen">Amenities</h3>
+  <ul><li data-i18n="a0">Heated swimming pool</li><li data-i18n="a1">Rooftop barbecue area</li><li data-i18n="a2">4 parking levels</li><li data-i18n="a3">High-speed lifts</li><li data-i18n="a4">24/7 CCTV &amp; intercom</li><li data-i18n="a5">Backup generator</li><li data-i18n="a6">Borehole with water purifier</li></ul>
+  <p class="fx" data-i18n="fx">This tour shows the furnished B3 show house.</p>
 </aside>
-<a id="waFab" class="wa-fab" href="https://wa.me/254116333444" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg></a>
+<a id="waFab" class="wa-fab" href="https://wa.me/254116333444" target="_blank" rel="noopener" data-i18n-t="tChat" aria-label="Chat on WhatsApp"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg></a>
 <div id="enq" class="enq" hidden>
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="enqT" tabindex="-1">
-    <button class="x" id="enqX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="x" id="enqX" data-i18n-t="tClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <p class="eyebrow">Riara Oasis Residency</p>
-    <h2 id="enqT">Interested in this B3 unit?</h2>
+    <h2 id="enqT" data-i18n="eTitle">Interested in this B3 unit?</h2>
     <div class="direct">
-      <a class="btn wa-btn" id="waDirect" href="https://wa.me/254116333444" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span>WhatsApp us</span></a>
+      <a class="btn wa-btn" id="waDirect" href="https://wa.me/254116333444" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span data-i18n="eWa">WhatsApp us</span></a>
       <a class="btn call" href="tel:+254116333444"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg><span>+254 116 333 444</span></a>
     </div>
     <form id="enqForm" novalidate>
-      <p class="or">Or send your details and we'll get back to you</p>
+      <p class="or" data-i18n="eOr">Or send your details and we'll get back to you</p>
       <div class="row">
-        <label>Full name <b class="req">*</b><input id="fName" autocomplete="name" placeholder="Your name" required></label>
-        <label>Phone or email <b class="req">*</b><input id="fContact" autocomplete="tel" placeholder="Your phone or email" required></label>
+        <label><span data-i18n="fName">Full name</span> <b class="req">*</b><input id="fName" autocomplete="name" placeholder="Your name" data-i18n-ph="phName" required></label>
+        <label><span data-i18n="fContact">Phone or email</span> <b class="req">*</b><input id="fContact" autocomplete="tel" placeholder="Your phone or email" data-i18n-ph="phContact" required></label>
       </div>
       <div class="row">
-        <label>Show house viewing date <b class="req">*</b><input type="date" id="fDate" required></label>
-        <label>Viewing <b class="req">*</b><select id="fView" required><option value="">Choose one</option><option>Visit the show house</option></select></label>
+        <label><span data-i18n="fDate">Show house viewing date</span> <b class="req">*</b><input type="date" id="fDate" required></label>
+        <label><span data-i18n="fView">Viewing</span> <b class="req">*</b><select id="fView" required><option value="" data-i18n="choose">Choose one</option><option value="Visit the show house" data-i18n="visit">Visit the show house</option></select></label>
       </div>
       <p class="err" id="fErr" role="alert"></p>
-      <a class="btn wa-btn wide" id="fSend" href="https://wa.me/254116333444" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span>Send enquiry on WhatsApp</span></a>
+      <a class="btn wa-btn wide" id="fSend" href="https://wa.me/254116333444" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span data-i18n="eSend">Send enquiry on WhatsApp</span></a>
     </form>
   </div>
 </div>
-<div id="hint">Drag to look around · tap the circles to walk</div>
+<div id="hint" data-i18n-html="hint">Drag to look around · tap the circles to walk</div>
 <footer>
-  <div class="nav"><button id="prev" title="Scroll rooms left" aria-label="Scroll rooms left"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+  <div class="nav"><button id="prev" data-i18n-t="tPrev" title="Scroll rooms left" aria-label="Scroll rooms left"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div>
   <div class="track" id="track"><div id="strip" role="list"></div></div>
-  <div class="nav"><button id="next" title="Scroll rooms right" aria-label="Scroll rooms right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>
+  <div class="nav"><button id="next" data-i18n-t="tNext" title="Scroll rooms right" aria-label="Scroll rooms right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>
 </footer>
-<div id="err"><p>This device could not start the 3D viewer (WebGL is off or unsupported).<br>Try a recent Chrome, Safari or Edge.</p></div>
+<div id="err"><p data-i18n-html="err">This device could not start the 3D viewer (WebGL is off or unsupported).<br>Try a recent Chrome, Safari or Edge.</p></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 {
 // Each room: id, name, photo file, start direction (u = 0..1 across the photo), and doorways.
 // Doorway: [u, v, target id]  - u/v are positions across/down the panorama photo.
+// ---- Languages: English, French, Spanish, Arabic ----
+const FLAGS={
+ en:'<svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="fgU"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="fgT"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#fgU)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#fgT)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg>',
+ fr:'<svg viewBox="0 0 3 2" aria-hidden="true"><path fill="#0055A4" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#EF4135" d="M2 0h1v2H2z"/></svg>',
+ es:'<svg viewBox="0 0 3 2" aria-hidden="true"><path fill="#AA151B" d="M0 0h3v2H0z"/><path fill="#F1BF00" d="M0 .5h3v1H0z"/></svg>',
+ ar:'<svg viewBox="0 0 30 20" aria-hidden="true"><path fill="#006C35" d="M0 0h30v20H0z"/><path d="M8 7.2c1.2-1.1 2.2.6 3.3-.4s1.9.8 3-.3 2 .7 3.2-.3 2 .6 3.3-.5M8.5 9.4c2.6.2 6.5.1 13-.2" fill="none" stroke="#fff" stroke-width=".9" stroke-linecap="round"/><path d="M8.5 13.2h12.6l1.4-.6M10 12.4v1.6" fill="none" stroke="#fff" stroke-width=".9" stroke-linecap="round"/></svg>'
+};
+const LANGS={en:{code:'ENG',name:'English',dir:'ltr'},fr:{code:'FRA',name:'Français',dir:'ltr'},es:{code:'ESP',name:'Español',dir:'ltr'},ar:{code:'ARA',name:'العربية',dir:'rtl'}};
+const I18N={
+en:{beds:'2 bedrooms',price:'Off-plan · for sale',tContact:'Enquire about this unit',details:'Property details',tRot:'Auto-rotate',tFs:'Full screen',tCloseD:'Close details',tClose:'Close',tChat:'Chat on WhatsApp',tPrev:'Scroll rooms left',tNext:'Scroll rooms right',tLang:'Language',tour:'Virtual Tour',
+ dUnit:'Unit type',dSize:'Size',dBath:'Bathrooms',dPrice:'Price',dBalc:'Balconies',dLoc:'Location',dComp:'Completion',
+ vUnit:'B3 · 2 bedrooms',vBath:'2 en-suite + guest toilet',vPrice:'On request',vBalc:'2 - off the living room and the master bedroom',vLoc:'Riara Road, Kilimani - next to Makini School',vComp:'March 2028',
+ amen:'Amenities',a0:'Heated swimming pool',a1:'Rooftop barbecue area',a2:'4 parking levels',a3:'High-speed lifts',a4:'24/7 CCTV & intercom',a5:'Backup generator',a6:'Borehole with water purifier',fx:'This tour shows the furnished B3 show house.',
+ eTitle:'Interested in this B3 unit?',eWa:'WhatsApp us',eOr:"Or send your details and we'll get back to you",fName:'Full name',fContact:'Phone or email',fDate:'Show house viewing date',fView:'Viewing',phName:'Your name',phContact:'Your phone or email',choose:'Choose one',visit:'Visit the show house',eSend:'Send enquiry on WhatsApp',
+ mPlease:'Please add ',mName:'your name',mContact:'a phone number or email',mDate:'a viewing date',mView:'the viewing type',comma:', ',and:' and ',stop:'.',
+ hint:'Drag to look around · tap the circles to walk',hintTouch:'Swipe to look around<br>Tap the circles to walk',err:'This device could not start the 3D viewer (WebGL is off or unsupported).<br>Try a recent Chrome, Safari or Edge.',
+ rooms:{}},
+fr:{beds:'2 chambres',price:'Sur plan · à vendre',tContact:'Se renseigner sur ce logement',details:'Détails du bien',tRot:'Rotation automatique',tFs:'Plein écran',tCloseD:'Fermer les détails',tClose:'Fermer',tChat:'Discuter sur WhatsApp',tPrev:'Pièces précédentes',tNext:'Pièces suivantes',tLang:'Langue',tour:'Visite virtuelle',
+ dUnit:'Type de logement',dSize:'Surface',dBath:'Salles de bain',dPrice:'Prix',dBalc:'Balcons',dLoc:'Emplacement',dComp:'Livraison',
+ vUnit:'B3 · 2 chambres',vBath:'2 salles de bain attenantes + WC invités',vPrice:'Sur demande',vBalc:'2 - côté salon et côté chambre principale',vLoc:'Riara Road, Kilimani - à côté de Makini School',vComp:'Mars 2028',
+ amen:'Équipements',a0:'Piscine chauffée',a1:'Espace barbecue sur le toit',a2:'4 niveaux de parking',a3:'Ascenseurs rapides',a4:'Vidéosurveillance 24h/24 et interphone',a5:'Groupe électrogène de secours',a6:"Forage avec purificateur d'eau",fx:"Cette visite présente l'appartement témoin B3 meublé.",
+ eTitle:'Ce logement B3 vous intéresse ?',eWa:'Écrire sur WhatsApp',eOr:'Ou laissez vos coordonnées et nous vous recontacterons',fName:'Nom complet',fContact:'Téléphone ou e-mail',fDate:"Date de visite de l'appartement témoin",fView:'Visite',phName:'Votre nom',phContact:'Votre téléphone ou e-mail',choose:'Choisir',visit:"Visiter l'appartement témoin",eSend:'Envoyer la demande sur WhatsApp',
+ mPlease:'Veuillez indiquer ',mName:'votre nom',mContact:'un numéro de téléphone ou un e-mail',mDate:'une date de visite',mView:'le type de visite',comma:', ',and:' et ',stop:'.',
+ hint:'Faites glisser pour regarder autour · touchez les cercles pour avancer',hintTouch:'Balayez pour regarder autour<br>Touchez les cercles pour avancer',err:"Cet appareil ne peut pas lancer la visionneuse 3D (WebGL désactivé ou non pris en charge).<br>Essayez une version récente de Chrome, Safari ou Edge.",
+ rooms:{entrance:'Entrée','living-dining':'Séjour et salle à manger',living:'Salon',dining:'Coin repas',kitchen:'Cuisine',balcony:'Balcon','balcony-view':'Vue du balcon','balcony-side':'Balcon - côté cuisine',corridor:'Entrée chambre 2','bedroom-2':'Chambre 2','b2-wardrobe':'Dressing chambre 2','b2-bath':'Salle de bain chambre 2',hallway:'Couloir','guest-wc':'WC invités','master-wardrobe':'Dressing principal',ensuite:'Salle de bain principale',master:'Chambre principale','master-view':'Chambre principale - vue','master-balcony':'Balcon chambre principale'}},
+es:{beds:'2 dormitorios',price:'Sobre plano · en venta',tContact:'Consultar por esta unidad',details:'Detalles de la propiedad',tRot:'Rotación automática',tFs:'Pantalla completa',tCloseD:'Cerrar detalles',tClose:'Cerrar',tChat:'Chatear por WhatsApp',tPrev:'Habitaciones anteriores',tNext:'Habitaciones siguientes',tLang:'Idioma',tour:'Recorrido virtual',
+ dUnit:'Tipo de unidad',dSize:'Superficie',dBath:'Baños',dPrice:'Precio',dBalc:'Balcones',dLoc:'Ubicación',dComp:'Entrega',
+ vUnit:'B3 · 2 dormitorios',vBath:'2 baños en suite + aseo de invitados',vPrice:'A consultar',vBalc:'2 - en el salón y en el dormitorio principal',vLoc:'Riara Road, Kilimani - junto a Makini School',vComp:'Marzo de 2028',
+ amen:'Servicios',a0:'Piscina climatizada',a1:'Zona de barbacoa en la azotea',a2:'4 plantas de aparcamiento',a3:'Ascensores de alta velocidad',a4:'CCTV 24/7 e interfono',a5:'Generador de respaldo',a6:'Pozo con purificador de agua',fx:'Este recorrido muestra el piso piloto B3 amueblado.',
+ eTitle:'¿Le interesa esta unidad B3?',eWa:'Escríbanos por WhatsApp',eOr:'O déjenos sus datos y le contactaremos',fName:'Nombre completo',fContact:'Teléfono o correo',fDate:'Fecha de visita al piso piloto',fView:'Visita',phName:'Su nombre',phContact:'Su teléfono o correo',choose:'Elija una opción',visit:'Visitar el piso piloto',eSend:'Enviar consulta por WhatsApp',
+ mPlease:'Por favor, indique ',mName:'su nombre',mContact:'un teléfono o correo',mDate:'una fecha de visita',mView:'el tipo de visita',comma:', ',and:' y ',stop:'.',
+ hint:'Arrastre para mirar alrededor · toque los círculos para avanzar',hintTouch:'Deslice para mirar alrededor<br>Toque los círculos para avanzar',err:'Este dispositivo no puede iniciar el visor 3D (WebGL desactivado o no compatible).<br>Pruebe una versión reciente de Chrome, Safari o Edge.',
+ rooms:{entrance:'Entrada','living-dining':'Salón comedor',living:'Salón',dining:'Comedor',kitchen:'Cocina',balcony:'Balcón','balcony-view':'Vista desde el balcón','balcony-side':'Balcón - lado cocina',corridor:'Entrada dormitorio 2','bedroom-2':'Dormitorio 2','b2-wardrobe':'Armario dormitorio 2','b2-bath':'Baño dormitorio 2',hallway:'Pasillo','guest-wc':'Aseo de invitados','master-wardrobe':'Vestidor principal',ensuite:'Baño principal',master:'Dormitorio principal','master-view':'Dormitorio principal - vista','master-balcony':'Balcón principal'}},
+ar:{beds:'غرفتا نوم',price:'على المخطط · للبيع',tContact:'استفسر عن هذه الوحدة',details:'تفاصيل العقار',tRot:'تدوير تلقائي',tFs:'ملء الشاشة',tCloseD:'إغلاق التفاصيل',tClose:'إغلاق',tChat:'تواصل عبر واتساب',tPrev:'الغرف السابقة',tNext:'الغرف التالية',tLang:'اللغة',tour:'جولة افتراضية',
+ dUnit:'نوع الوحدة',dSize:'المساحة',dBath:'الحمّامات',dPrice:'السعر',dBalc:'الشرفات',dLoc:'الموقع',dComp:'موعد التسليم',
+ vUnit:'B3 · غرفتا نوم',vBath:'حمّامان داخليان + حمّام للضيوف',vPrice:'عند الطلب',vBalc:'شرفتان - من غرفة المعيشة ومن غرفة النوم الرئيسية',vLoc:'طريق ريارا، كيليماني - بجوار مدرسة ماكيني',vComp:'مارس 2028',
+ amen:'المرافق',a0:'مسبح مُدفأ',a1:'منطقة شواء على السطح',a2:'4 طوابق لمواقف السيارات',a3:'مصاعد عالية السرعة',a4:'كاميرات مراقبة على مدار الساعة واتصال داخلي',a5:'مولّد كهرباء احتياطي',a6:'بئر مع جهاز لتنقية المياه',fx:'تعرض هذه الجولة الشقة النموذجية B3 المفروشة.',
+ eTitle:'هل أنت مهتم بهذه الوحدة B3؟',eWa:'راسلنا عبر واتساب',eOr:'أو أرسل بياناتك وسنتواصل معك',fName:'الاسم الكامل',fContact:'الهاتف أو البريد الإلكتروني',fDate:'تاريخ زيارة الشقة النموذجية',fView:'المعاينة',phName:'اسمك',phContact:'هاتفك أو بريدك الإلكتروني',choose:'اختر',visit:'زيارة الشقة النموذجية',eSend:'إرسال الطلب عبر واتساب',
+ mPlease:'يرجى إدخال ',mName:'اسمك',mContact:'رقم الهاتف أو البريد الإلكتروني',mDate:'تاريخ الزيارة',mView:'نوع المعاينة',comma:'، ',and:' و',stop:'.',
+ hint:'اسحب للنظر حولك · انقر على الدوائر للتنقل',hintTouch:'مرّر للنظر حولك<br>انقر على الدوائر للتنقل',err:'تعذّر تشغيل العارض ثلاثي الأبعاد على هذا الجهاز (WebGL معطّل أو غير مدعوم).<br>جرّب إصدارًا حديثًا من Chrome أو Safari أو Edge.',
+ rooms:{entrance:'المدخل','living-dining':'المعيشة والطعام',living:'غرفة المعيشة',dining:'منطقة الطعام',kitchen:'المطبخ',balcony:'الشرفة','balcony-view':'إطلالة الشرفة','balcony-side':'الشرفة - جهة المطبخ',corridor:'مدخل غرفة النوم 2','bedroom-2':'غرفة النوم 2','b2-wardrobe':'خزانة غرفة النوم 2','b2-bath':'حمّام غرفة النوم 2',hallway:'الممر','guest-wc':'حمّام الضيوف','master-wardrobe':'خزانة الغرفة الرئيسية',ensuite:'حمّام الغرفة الرئيسية',master:'غرفة النوم الرئيسية','master-view':'غرفة النوم الرئيسية - إطلالة','master-balcony':'شرفة الغرفة الرئيسية'}}
+};
+let LANG=(()=>{let s=null;try{s=localStorage.getItem('lang')}catch(_){}if(s&&I18N[s])return s;const n=(navigator.language||'en').slice(0,2);return I18N[n]?n:'en'})();
+const L=k=>(I18N[LANG]&&I18N[LANG][k]!==undefined?I18N[LANG][k]:I18N.en[k]);
 const ROOMS=[
  {id:'entrance',name:'Entrance',f:'01',u:.62,go:[[.62,.6,'living-dining'],[.5,.6,'living'],[.88,.58,'kitchen'],[.02,.58,'hallway']]},
  {id:'living-dining',name:'Living & Dining',f:'02',u:.45,go:[[.22,.58,'entrance'],[.43,.55,'corridor'],[.55,.62,'living'],[.72,.58,'balcony'],[.9,.62,'dining'],[.05,.58,'hallway']]},
@@ -296,13 +358,13 @@ async function go(id,push=true){
   const [t]=await Promise.all([tex(r),wait]);
   cur=r;onRoom(r);mat.map=t;mat.needsUpdate=true;lon=r.u;lat=0;fov=baseFov();
   $('#name').textContent=r.name;
-    document.title=r.name+' · Riara Oasis B3 Virtual Tour';
+    document.title=r.name+' · Riara Oasis B3 '+L('tour');
   for(const b of strip.children){const on=b.dataset.id===r.id;b.setAttribute('aria-current',on);if(on)b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
   hs.innerHTML='';
   spots=r.go.map(([u,v,to])=>{
     const b=document.createElement('button');b.className='spot';
     b.innerHTML='<span class="ring"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><span class="lbl"></span>';
-    b.querySelector('.lbl').textContent=byId[to].name;
+    b.dataset.to=to;b.querySelector('.lbl').textContent=byId[to].name;
     b.addEventListener('click',e=>{e.stopPropagation();go(to)});
     hs.appendChild(b);return {el:b,p:dir(u,v,400)};
   });
@@ -334,7 +396,7 @@ function frame(){
 
 // drag / pinch / wheel / keys
 let down=false,px=0,py=0;const pts=new Map();let pinch0=0,fov0=80;
-const hint=$('#hint');if(matchMedia('(pointer:coarse)').matches)hint.innerHTML='Swipe to look around<br>Tap the circles to walk';const hideHint=()=>hint.classList.add('gone');setTimeout(hideHint,5000);
+const hint=$('#hint');const hideHint=()=>hint.classList.add('gone');setTimeout(hideHint,5000);
 view.addEventListener('pointerdown',e=>{view.setPointerCapture(e.pointerId);pts.set(e.pointerId,e);down=true;px=e.clientX;py=e.clientY;view.classList.add('drag');hideHint();
   if(pts.size===2){const [a,b]=[...pts.values()];pinch0=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);fov0=fov}});
 view.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,e);
@@ -410,21 +472,58 @@ function buildMsg(){
   const dv=F('fDate').value,mo=dv?new Date(dv+'T12:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
   return ['Enquiry - Riara Oasis B3, 2 bedrooms, 128 m² (virtual tour)','',
     'Name: '+F('fName').value.trim(),'Contact: '+F('fContact').value.trim(),
-    mo?'Preferred viewing date: '+mo:'',F('fView').value?'Viewing: '+F('fView').value:'','',"Hello, I saw the virtual tour of the B3 unit at Riara Oasis Residency and I'm interested. Please share the price and payment plan."].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\n');
+    mo?'Preferred viewing date: '+mo:'',F('fView').value?'Viewing: '+F('fView').value:'',LANG!=='en'?'Language: '+LANGS[LANG].name:'','',"Hello, I saw the virtual tour of the B3 unit at Riara Oasis Residency and I'm interested. Please share the price and payment plan."].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\n');
 }
 const send=F('fSend');
 const upd=e=>{send.href=waLink(buildMsg());if(e&&e.target&&e.target.value&&e.target.value.trim())e.target.classList.remove('bad')};
 $('#enqForm').addEventListener('input',upd);$('#enqForm').addEventListener('change',upd);upd();
 send.addEventListener('click',e=>{
-  const need=[['fName','your name'],['fContact','a phone number or email'],['fDate','a viewing date'],['fView','the viewing type']];
+  const need=[['fName',L('mName')],['fContact',L('mContact')],['fDate',L('mDate')],['fView',L('mView')]];
   const miss=need.filter(([id])=>!F(id).value.trim());
   need.forEach(([id])=>F(id).classList.toggle('bad',!F(id).value.trim()));
-  if(miss.length){e.preventDefault();const w=miss.map(m=>m[1]);F('fErr').textContent='Please add '+(w.length>1?w.slice(0,-1).join(', ')+' and '+w[w.length-1]:w[0])+'.';F(miss[0][0]).focus();return}
+  if(miss.length){e.preventDefault();const w=miss.map(m=>m[1]);F('fErr').textContent=L('mPlease')+(w.length>1?w.slice(0,-1).join(L('comma'))+L('and')+w[w.length-1]:w[0])+L('stop');F(miss[0][0]).focus();return}
   F('fErr').textContent='';upd();
 });
 $('#enqForm').addEventListener('submit',e=>e.preventDefault());
 addEventListener('hashchange',()=>go(location.hash.slice(1),false));
 
+// ---- language switcher ----
+ROOMS.forEach(r=>r.en=r.name);
+const isTouch=matchMedia('(pointer:coarse)').matches;
+function applyLang(lg){
+  LANG=I18N[lg]?lg:'en';try{localStorage.setItem('lang',LANG)}catch(_){}
+  const d=LANGS[LANG];document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=L(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=L(e.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-t]').forEach(e=>{const t=L(e.dataset.i18nT);e.title=t;e.setAttribute('aria-label',t)});
+  $('#hint').innerHTML=isTouch?L('hintTouch'):L('hint');
+  $('#err p').innerHTML=L('err');
+  ['.where','#facts','#enq .card','#hint'].forEach(q=>{const e=$(q);if(e)e.dir=d.dir});
+  $('#fDate').lang=LANG;
+  const rn=I18N[LANG].rooms||{};ROOMS.forEach(r=>r.name=rn[r.id]||r.en);
+  for(const b of strip.children)b.textContent=byId[b.dataset.id].name;
+  hs.querySelectorAll('.spot').forEach(b=>{if(b.dataset.to)b.querySelector('.lbl').textContent=byId[b.dataset.to].name});
+  if(cur){$('#name').textContent=cur.name;document.title=cur.name+' · Riara Oasis B3 '+L('tour')}
+  if(F('fErr').textContent)F('fErr').textContent='';
+  langBtn.innerHTML=`<span class="flag">${FLAGS[LANG]}</span><span class="code">${d.code}</span><svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
+  langBtn.setAttribute('aria-label',L('tLang')+': '+d.name);
+  langMenu.querySelectorAll('[role=option]').forEach(o=>o.setAttribute('aria-selected',o.dataset.lang===LANG));
+  upd();edges();
+}
+const langBox=$('#lang');
+langBox.innerHTML='<button type="button" class="lang-btn" aria-haspopup="listbox" aria-expanded="false"></button><ul class="lang-menu" role="listbox" hidden>'+
+  Object.keys(LANGS).map(k=>`<li role="option" tabindex="0" data-lang="${k}" lang="${k}"><span class="flag">${FLAGS[k]}</span><span class="code">${LANGS[k].code}</span><span class="nm">${LANGS[k].name}</span></li>`).join('')+'</ul>';
+const langBtn=langBox.querySelector('.lang-btn'),langMenu=langBox.querySelector('.lang-menu');
+const menu=open=>{langMenu.hidden=!open;langBtn.setAttribute('aria-expanded',open);if(open)(langMenu.querySelector('[aria-selected=true]')||langMenu.firstChild).focus()};
+langBtn.addEventListener('click',e=>{e.stopPropagation();menu(langMenu.hidden)});
+langMenu.addEventListener('click',e=>{const o=e.target.closest('[data-lang]');if(o){applyLang(o.dataset.lang);menu(false);langBtn.focus()}});
+langMenu.addEventListener('keydown',e=>{const o=e.target.closest('[data-lang]');if(!o)return;
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();o.click()}
+  else if(e.key==='ArrowDown'){e.preventDefault();(o.nextElementSibling||langMenu.firstChild).focus()}
+  else if(e.key==='ArrowUp'){e.preventDefault();(o.previousElementSibling||langMenu.lastChild).focus()}
+  else if(e.key==='Escape'){menu(false);langBtn.focus()}});
+addEventListener('click',e=>{if(!langBox.contains(e.target))menu(false)});
+applyLang(LANG);
 go(byId[location.hash.slice(1)]?location.hash.slice(1):'entrance',false).catch(()=>{$('#err').style.display='grid'});
 frame();
 }
