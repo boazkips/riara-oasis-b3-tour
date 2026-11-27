@@ -114,7 +114,10 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
 #enqForm select option{background:#1e1a16}
 #enqForm select{-webkit-appearance:none;appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;cursor:pointer}
 #enqForm input[type=date]{min-height:40px;cursor:pointer;-webkit-appearance:none;appearance:none}
-#enqForm input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.9;cursor:pointer}
+#enqForm input[type=date]::-webkit-calendar-picker-indicator{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") center/18px no-repeat;opacity:1;cursor:pointer;width:18px;height:18px}
+#enqForm input::placeholder{color:rgba(255,255,255,.38)}
+#enqForm .req{color:var(--orange);font-weight:400}
+#enqForm .bad{border-color:#e5533d}
 #enqForm select:focus{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 #enqForm textarea{resize:vertical;line-height:1.35}
 #enqForm input:focus,#enqForm select:focus,#enqForm textarea:focus{outline:none;border-color:var(--orange);background-color:rgba(255,255,255,.09)}
@@ -207,12 +210,12 @@ footer .nav button[disabled]{opacity:.3;cursor:default;background:rgba(60,60,60,
     <form id="enqForm" novalidate>
       <p class="or">Or send your details and we'll get back to you</p>
       <div class="row">
-        <label>Full name<input id="fName" autocomplete="name" required></label>
-        <label>Phone or email<input id="fContact" autocomplete="tel" required></label>
+        <label>Full name <b class="req">*</b><input id="fName" autocomplete="name" placeholder="Your name" required></label>
+        <label>Phone or email <b class="req">*</b><input id="fContact" autocomplete="tel" placeholder="Your phone or email" required></label>
       </div>
       <div class="row">
-        <label>Show house viewing date<input type="date" id="fDate"></label>
-        <label>Viewing<select id="fView"><option>Visit the show house</option><option>Video call</option></select></label>
+        <label>Show house viewing date <b class="req">*</b><input type="date" id="fDate" required></label>
+        <label>Viewing <b class="req">*</b><select id="fView" required><option value="">Choose one</option><option>Visit the show house</option></select></label>
       </div>
       <p class="err" id="fErr" role="alert"></p>
       <a class="btn wa-btn wide" id="fSend" href="https://wa.me/254116333444" target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 7.8c.3-.3.8-.3 1 .1l.8 1.7c.1.3 0 .6-.2.8l-.6.6c.6 1.3 1.6 2.3 2.9 2.9l.6-.6c.2-.2.5-.3.8-.2l1.7.8c.4.2.5.7.1 1-.6.7-1.5 1.1-2.4.9-2.8-.6-5.1-2.9-5.7-5.7-.2-.9.2-1.7 1-2.3z" fill="currentColor"/></svg><span>Send enquiry on WhatsApp</span></a>
@@ -407,14 +410,16 @@ function buildMsg(){
   const dv=F('fDate').value,mo=dv?new Date(dv+'T12:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
   return ['Enquiry - Riara Oasis B3, 2 bedrooms, 128 m² (virtual tour)','',
     'Name: '+F('fName').value.trim(),'Contact: '+F('fContact').value.trim(),
-    mo?'Preferred viewing date: '+mo:'','Viewing: '+F('fView').value,'',"Hello, I saw the virtual tour of the B3 unit at Riara Oasis Residency and I'm interested. Please share the price and payment plan."].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\n');
+    mo?'Preferred viewing date: '+mo:'',F('fView').value?'Viewing: '+F('fView').value:'','',"Hello, I saw the virtual tour of the B3 unit at Riara Oasis Residency and I'm interested. Please share the price and payment plan."].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\n');
 }
 const send=F('fSend');
-const upd=()=>{send.href=waLink(buildMsg())};
-$('#enqForm').addEventListener('input',upd);upd();
+const upd=e=>{send.href=waLink(buildMsg());if(e&&e.target&&e.target.value&&e.target.value.trim())e.target.classList.remove('bad')};
+$('#enqForm').addEventListener('input',upd);$('#enqForm').addEventListener('change',upd);upd();
 send.addEventListener('click',e=>{
-  const miss=[];if(!F('fName').value.trim())miss.push('your name');if(!F('fContact').value.trim())miss.push('a phone number or email');
-  if(miss.length){e.preventDefault();F('fErr').textContent='Please add '+miss.join(' and ')+'.';(F('fName').value.trim()?F('fContact'):F('fName')).focus();return}
+  const need=[['fName','your name'],['fContact','a phone number or email'],['fDate','a viewing date'],['fView','the viewing type']];
+  const miss=need.filter(([id])=>!F(id).value.trim());
+  need.forEach(([id])=>F(id).classList.toggle('bad',!F(id).value.trim()));
+  if(miss.length){e.preventDefault();const w=miss.map(m=>m[1]);F('fErr').textContent='Please add '+(w.length>1?w.slice(0,-1).join(', ')+' and '+w[w.length-1]:w[0])+'.';F(miss[0][0]).focus();return}
   F('fErr').textContent='';upd();
 });
 $('#enqForm').addEventListener('submit',e=>e.preventDefault());
